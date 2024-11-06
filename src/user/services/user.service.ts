@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdatePasswordDto } from '../dto/update-password.dto';
 import { User } from '../interfaces/user.interface';
 
 @Injectable()
@@ -23,11 +22,23 @@ export class UserService {
     return this.userRepository.findOne(id);
   }
 
-  async update(id: string, updateUserDto: UpdatePasswordDto): Promise<User> {
-    return this.userRepository.update(id, updateUserDto);
+  async delete(id: string): Promise<void> {
+    return this.userRepository.delete(id);
   }
 
-  async remove(id: string): Promise<void> {
-    this.userRepository.remove(id);
+  async validatePassword(userId: string, password: string): Promise<boolean> {
+    const user = await this.findOne(userId);
+    return user ? user.password === password : false;
+  }
+
+  async updatePassword(id: string, newPassword: string): Promise<User> {
+    const user = await this.findOne(id);
+    if (user) {
+      user.password = newPassword;
+      user.version += 1;
+      user.updatedAt = Date.now();
+      return user;
+    }
+    return null;
   }
 }

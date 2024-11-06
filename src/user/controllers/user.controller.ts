@@ -1,46 +1,81 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
+  HttpException,
+  HttpStatus,
   Param,
-  Delete,
-  Inject,
+  Post,
+  Put,
 } from '@nestjs/common';
+import { validate } from 'uuid';
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
 
-@Controller('users')
+@Controller('user')
 export class UserController {
-  constructor(
-    @Inject('UserRepository') private readonly userService: UserService,
-  ) {}
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
+  constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async getAllUsers() {
+    return await this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  async getUserById(@Param('id') id: string) {
+    if (!validate(id)) {
+      throw new HttpException('Invalid user ID', HttpStatus.BAD_REQUEST);
+    }
+
+    const user = await this.userService.findOne(id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdatePasswordDto) {
-    return this.userService.update(id, updateUserDto);
+  @Post()
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    if (!createUserDto.login || !createUserDto.password) {
+      throw new HttpException(
+        'Missing required fields',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const user = await this.userService.create(createUserDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      user,
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    this.userService.remove(id);
-    return { message: `User with id ${id} was deleted` };
+  @Put(':id')
+  async updatePassword(
+    @Param('id') id: string,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    if (!validate(id)) {
+      throw new HttpException('Invalid user ID', HttpStatus.BAD_REQUEST);
+    }
+
+    const user = await this.userService.findOne(id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const isOldPasswordCorrect = await this.userService.validatePassword(
+      id,
+      updatePasswordDto.oldPassword,
+    );
+    if (!isOldPasswordCorrect) {
+      throw new HttpException(
+        'Old password is incorrect',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    return this.userService.updatePassword(id, updatePasswordDto.newPassword);
   }
 }

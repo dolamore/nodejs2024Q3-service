@@ -9,24 +9,29 @@ import { UpdatePasswordDto } from '../dto/update-password.dto';
 export class InMemoryUserRepository implements UserRepositoryInterface {
   private users: User[] = [];
 
-  create(createUserDto: CreateUserDto): User {
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    // Генерация уникального ID для нового пользователя
+    const id = uuidv4();
+
+    // Создание нового пользователя
     const newUser: User = {
-      id: uuidv4(),
+      id, // uuid v4
       login: createUserDto.login,
-      password: createUserDto.password,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      password: createUserDto.password, // В реальном приложении пароль следует хешировать
+      version: 1, // Начальный номер версии
+      createdAt: Date.now(), // Время создания
+      updatedAt: Date.now(), // Время последнего обновления (по умолчанию совпадает с созданием)
     };
-    this.users.push(newUser);
-    return newUser;
+
+    this.users.push(newUser); // Добавление нового пользователя в память
+    return newUser; // Возвращение созданного пользователя
   }
 
-  findAll(): User[] {
+  async findAll(): Promise<User[]> {
     return this.users;
   }
 
-  findOne(id: string): User | undefined {
+  async findOne(id: string): Promise<User | undefined> {
     const result = this.users.find((user) => user.id === id);
 
     if (!result) {
@@ -36,30 +41,19 @@ export class InMemoryUserRepository implements UserRepositoryInterface {
     return result;
   }
 
-  update(id: string, updatePasswordDto: UpdatePasswordDto): User {
-    const user = this.findOne(id);
-
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} wasn't found`);
+  async updatePassword(
+    id: string,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<User> {
+    const user = await this.findOne(id);
+    if (user) {
+      user.password = updatePasswordDto.newPassword;
+      return user;
     }
-
-    if (!updatePasswordDto) {
-      throw new Error('No data provided');
-    }
-
-    if (updatePasswordDto.oldPassword !== user.password) {
-      throw new Error('Old password is incorrect');
-    }
-
-    user.password = updatePasswordDto.newPassword;
-
-    user.version++;
-    user.updatedAt = Date.now();
-
-    return user;
+    throw new Error('User not found');
   }
 
-  remove(id: string): void {
+  async delete(id: string): Promise<void> {
     const index = this.users.findIndex((user) => user.id === id);
 
     if (index === -1) {
@@ -67,5 +61,7 @@ export class InMemoryUserRepository implements UserRepositoryInterface {
     }
 
     this.users.splice(index, 1);
+
+    return Promise.resolve();
   }
 }
