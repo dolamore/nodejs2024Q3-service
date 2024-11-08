@@ -1,37 +1,38 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
 import { User } from '../interfaces/user.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
+import { UserReturnData } from '../types/userReturnData';
 
 @Injectable()
 export class InMemoryUserRepository implements UserRepositoryInterface {
   private users: User[] = [];
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    // Генерация уникального ID для нового пользователя
-    const id = uuidv4();
-
-    // Создание нового пользователя
+  create(createUserDto: CreateUserDto): UserReturnData {
     const newUser: User = {
-      id, // uuid v4
+      id: uuidv4(),
       login: createUserDto.login,
-      password: createUserDto.password, // В реальном приложении пароль следует хешировать
-      version: 1, // Начальный номер версии
-      createdAt: Date.now(), // Время создания
-      updatedAt: Date.now(), // Время последнего обновления (по умолчанию совпадает с созданием)
+      password: createUserDto.password, // TODO стоит ли захэшировать пароль?
+      version: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     };
 
-    this.users.push(newUser); // Добавление нового пользователя в память
-    return newUser; // Возвращение созданного пользователя
+    this.users.push(newUser);
+    return this.userToUserReturnData(newUser);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.users;
+  findAll(): UserReturnData[] {
+    return [...this.users.map((user) => this.userToUserReturnData(user))];
   }
 
-  async findOne(id: string): Promise<User | undefined> {
+  findOne(id: string): UserReturnData | undefined {
     const result = this.users.find((user) => user.id === id);
 
     if (!result) {
@@ -41,19 +42,24 @@ export class InMemoryUserRepository implements UserRepositoryInterface {
     return result;
   }
 
-  async updatePassword(
+  updatePassword(
     id: string,
     updatePasswordDto: UpdatePasswordDto,
-  ): Promise<User> {
-    const user = await this.findOne(id);
+  ): UserReturnData {
+    if (!this.validatePassword(id, updatePasswordDto.oldPassword)) {
+      throw new ForbiddenException(`Password is incorrect`);
+    }
+    const user = this.users.find((user) => user.id === id);
     if (user) {
       user.password = updatePasswordDto.newPassword;
-      return user;
+      user.version += 1;
+      user.updatedAt = Date.now();
+      return this.userToUserReturnData(user);
     }
-    throw new Error('User not found');
+    throw new NotFoundException(`User with id ${id} wasn't found`);
   }
 
-  async delete(id: string): Promise<void> {
+  delete(id: string): void {
     const index = this.users.findIndex((user) => user.id === id);
 
     if (index === -1) {
@@ -61,7 +67,20 @@ export class InMemoryUserRepository implements UserRepositoryInterface {
     }
 
     this.users.splice(index, 1);
+  }
 
-    return Promise.resolve();
+  userToUserReturnData(user: User): UserReturnData {
+    return {
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  validatePassword(userId: string, password: string): boolean {
+    const user = this.users.find((user) => user.id === userId);
+    return user ? user.password === password : false;
   }
 }

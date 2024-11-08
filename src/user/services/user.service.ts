@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { User } from '../interfaces/user.interface';
+import { UserReturnData } from '../types/userReturnData';
+import { UpdatePasswordDto } from '../dto/update-password.dto';
 
 @Injectable()
 export class UserService {
@@ -10,35 +11,31 @@ export class UserService {
     private readonly userRepository: UserRepositoryInterface,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    return this.userRepository.create(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<UserReturnData> {
+    const result = this.userRepository.create(createUserDto);
+    return result instanceof Promise ? await result : result;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.findAll();
+  async findAll(): Promise<UserReturnData[]> {
+    const result = this.userRepository.findAll();
+    return result instanceof Promise ? await result : result;
   }
 
-  async findOne(id: string): Promise<User | undefined> {
-    return this.userRepository.findOne(id);
+  async findOne(id: string): Promise<UserReturnData | undefined> {
+    const result = this.userRepository.findOne(id);
+    return result instanceof Promise ? await result : result;
   }
 
   async delete(id: string): Promise<void> {
-    return this.userRepository.delete(id);
+    const result = this.userRepository.delete(id);
+    return result instanceof Promise ? await result : result;
   }
 
-  async validatePassword(userId: string, password: string): Promise<boolean> {
-    const user = await this.findOne(userId);
-    return user ? user.password === password : false;
-  }
-
-  async updatePassword(id: string, newPassword: string): Promise<User> {
-    const user = await this.findOne(id);
-    if (user) {
-      user.password = newPassword;
-      user.version += 1;
-      user.updatedAt = Date.now();
-      return user;
-    }
-    return null;
+  async updatePassword(
+    id: string,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<UserReturnData> {
+    const result = this.userRepository.updatePassword(id, updatePasswordDto);
+    return result instanceof Promise ? await result : result;
   }
 }
