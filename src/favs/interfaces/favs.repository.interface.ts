@@ -1,4 +1,3 @@
-import { FavsResponseInterface } from './favs.response.interface';
 import { Favorites } from './favs.interface';
 
 export interface FavsRepositoryInterface {

@@ -17,18 +17,30 @@ import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
 import { UserReturnData } from '../types/userReturnData';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: 200, description: 'Successfully retrieved all users' })
   async getAllUsers() {
     const result = this.userService.findAll();
     return result instanceof Promise ? await result : result;
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved user',
+    type: UserReturnData,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid user ID' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   async getUserById(@Param('id') id: string): Promise<UserReturnData> {
     if (!validate(id)) {
       throw new BadRequestException('Invalid user ID');
@@ -49,6 +61,13 @@ export class UserController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successfully created user',
+    type: UserReturnData,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() createUserDto: CreateUserDto) {
     if (!createUserDto.login || !createUserDto.password) {
@@ -71,6 +90,15 @@ export class UserController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update user password' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully updated user',
+    type: UserReturnData,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid user ID' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Incorrect old password' })
   async updatePassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
@@ -105,6 +133,10 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Delete user by ID' })
+  @ApiResponse({ status: 204, description: 'Successfully deleted user' })
+  @ApiResponse({ status: 400, description: 'Invalid user ID' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   async deleteUser(@Param('id') id: string) {
     if (!validate(id)) {
       throw new BadRequestException('Invalid user ID');

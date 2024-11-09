@@ -15,17 +15,32 @@ import { validate } from 'uuid';
 import { AlbumService } from '../services/album.service';
 import { CreateAlbumDto } from '../dto/create-album.dto';
 import { UpdateAlbumInfoDto } from '../dto/update-album-info.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Albums')
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all albums' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved all albums',
+  })
   async getAllAlbums() {
     return await this.albumService.getAllAlbums();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get album by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved album',
+    type: CreateAlbumDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid album ID' })
+  @ApiResponse({ status: 404, description: 'Album not found' })
   async getAlbumById(@Param('id') id: string) {
     this.validateId(id);
     await this.isAlbumExist(id);
@@ -38,6 +53,13 @@ export class AlbumController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new album' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successfully created album',
+    type: CreateAlbumDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
   async createAlbum(@Body() createAlbumDto: CreateAlbumDto) {
     this.validateCreateAlbumDto(createAlbumDto);
 
@@ -45,6 +67,14 @@ export class AlbumController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update album info' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully updated album',
+    type: CreateAlbumDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid album ID' })
+  @ApiResponse({ status: 404, description: 'Album not found' })
   async updateAlbum(
     @Param('id') id: string,
     @Body() updateAlbumInfoDto: UpdateAlbumInfoDto,
@@ -58,6 +88,10 @@ export class AlbumController {
 
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Delete album by ID' })
+  @ApiResponse({ status: 204, description: 'Successfully deleted album' })
+  @ApiResponse({ status: 400, description: 'Invalid album ID' })
+  @ApiResponse({ status: 404, description: 'Album not found' })
   async deleteAlbum(@Param('id') id: string) {
     this.validateId(id);
     await this.isAlbumExist(id);

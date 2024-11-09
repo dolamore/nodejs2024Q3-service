@@ -11,17 +11,33 @@ import {
 } from '@nestjs/common';
 import { FavsService } from '../services/favs.service';
 import { validate } from 'uuid';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FavoritesResponse } from '../interfaces/favs.interface';
 
+@ApiTags('Favorites')
 @Controller('favs')
 export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all favorites' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved all favorites',
+    type: FavoritesResponse,
+  })
   async getAllFavs() {
     return await this.favsService.getAllFavs();
   }
 
   @Post('artist/:id')
+  @ApiOperation({ summary: 'Add artist to favorites' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successfully added artist to favorites',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid artist ID' })
+  @ApiResponse({ status: 404, description: 'Artist not found' })
   async addArtistToFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.isArtistExist(id);
@@ -29,6 +45,13 @@ export class FavsController {
   }
 
   @Post('album/:id')
+  @ApiOperation({ summary: 'Add album to favorites' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successfully added album to favorites',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid album ID' })
+  @ApiResponse({ status: 404, description: 'Album not found' })
   async addAlbumToFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.isAlbumExist(id);
@@ -36,6 +59,13 @@ export class FavsController {
   }
 
   @Post('track/:id')
+  @ApiOperation({ summary: 'Add track to favorites' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successfully added track to favorites',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid track ID' })
+  @ApiResponse({ status: 404, description: 'Track not found' })
   async addTrackToFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.isTrackExist(id);
@@ -44,6 +74,13 @@ export class FavsController {
 
   @Delete('artist/:id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remove artist from favorites' })
+  @ApiResponse({
+    status: 204,
+    description: 'Successfully removed artist from favorites',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid artist ID' })
+  @ApiResponse({ status: 404, description: 'Artist not found' })
   async deleteArtistFromFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.validateArtistId(id);
@@ -52,6 +89,13 @@ export class FavsController {
 
   @Delete('album/:id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remove album from favorites' })
+  @ApiResponse({
+    status: 204,
+    description: 'Successfully removed album from favorites',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid album ID' })
+  @ApiResponse({ status: 404, description: 'Album not found' })
   async deleteAlbumFromFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.validateAlbumId(id);
@@ -60,6 +104,13 @@ export class FavsController {
 
   @Delete('track/:id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remove track from favorites' })
+  @ApiResponse({
+    status: 204,
+    description: 'Successfully removed track from favorites',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid track ID' })
+  @ApiResponse({ status: 404, description: 'Track not found' })
   async deleteTrackFromFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.validateTrackId(id);

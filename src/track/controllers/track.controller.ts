@@ -14,17 +14,33 @@ import { TrackService } from '../services/track.service';
 import { validate } from 'uuid';
 import { CreateTrackDto } from '../dto/create-track.dto';
 import { UpdateTrackInfoDto } from '../dto/update-track-info.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Track } from '../interfaces/track.interface';
 
+@ApiTags('Tracks')
 @Controller('track')
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all tracks' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved all tracks',
+  })
   async getAllTracks() {
     return await this.trackService.getAllTracks();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get track by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully retrieved track',
+    type: Track,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid track ID' })
+  @ApiResponse({ status: 404, description: 'Track not found' })
   async getTrackById(@Param('id') id: string) {
     this.validateId(id);
     await this.isTrackExist(id);
@@ -37,6 +53,13 @@ export class TrackController {
 
   @Post()
   @HttpCode(201)
+  @ApiOperation({ summary: 'Create a new track' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successfully created track',
+    type: Track,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
   async createTrack(@Body() createTrackDto: CreateTrackDto) {
     this.validateCreateTrackDto(createTrackDto);
 
@@ -52,6 +75,14 @@ export class TrackController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update track info' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully updated track',
+    type: Track,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid track ID' })
+  @ApiResponse({ status: 404, description: 'Track not found' })
   async updateTrack(
     @Param('id') id: string,
     @Body() updateTrackInfoDto: UpdateTrackInfoDto,
@@ -72,6 +103,10 @@ export class TrackController {
 
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Delete track by ID' })
+  @ApiResponse({ status: 204, description: 'Successfully deleted track' })
+  @ApiResponse({ status: 400, description: 'Invalid track ID' })
+  @ApiResponse({ status: 404, description: 'Track not found' })
   async deleteTrack(@Param('id') id: string) {
     this.validateId(id);
     await this.isTrackExist(id);
