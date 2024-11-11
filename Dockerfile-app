@@ -4,11 +4,15 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
+COPY prisma ./prisma
+COPY .env .env
 COPY . .
 
-RUN npm run build
+RUN npm run build && \
+    npx prisma generate && \
+    npx prisma migrate dev --name init
 
 EXPOSE 4000
 

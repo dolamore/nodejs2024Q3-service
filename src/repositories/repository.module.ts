@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
-import { InMemoryUserRepository } from '../user/repositories/in-memory-user.repository';
 import { InMemoryArtistRepository } from '../artist/repositories/in-memory-artist.repository';
 import { InMemoryAlbumRepository } from '../album/repositories/in-memory-album.repository';
 import { InMemoryTrackRepository } from '../track/repositories/in-memory-track.repository';
 import { InMemoryFavsRepository } from '../favs/repositories/in-memory-favs.repository';
+import { PrismaUserRepository } from '../user/repositories/prisma-user.repository';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
+  imports: [PrismaModule],
   providers: [
     {
       provide: 'UserRepositoryInterface',
-      useClass: InMemoryUserRepository,
+      useClass: PrismaUserRepository,
     },
     {
       provide: 'ArtistRepositoryInterface',
