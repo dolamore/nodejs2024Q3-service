@@ -34,6 +34,7 @@ export class InMemoryFavsRepository implements FavsRepositoryInterface {
 
   async getAllFavs(): Promise<Favorites> {
     return {
+      id: '1',
       artists: this.artistIds,
       albums: this.albumIds,
       tracks: this.trackIds,

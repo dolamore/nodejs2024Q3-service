@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { InMemoryArtistRepository } from '../artist/repositories/in-memory-artist.repository';
-import { InMemoryAlbumRepository } from '../album/repositories/in-memory-album.repository';
-import { InMemoryTrackRepository } from '../track/repositories/in-memory-track.repository';
-import { InMemoryFavsRepository } from '../favs/repositories/in-memory-favs.repository';
 import { PrismaUserRepository } from '../user/repositories/prisma-user.repository';
 import { PrismaModule } from '../prisma/prisma.module';
+import { PrismaTrackRepository } from '../track/repositories/prisma-track.repository';
+import { PrismaArtistRepository } from '../artist/repositories/prisma-artist.repository';
+import { PrismaAlbumRepository } from '../album/repositories/prisma-album.repository';
+import { PrismaFavsRepository } from '../favs/repositories/prisma-fav.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -15,19 +15,19 @@ import { PrismaModule } from '../prisma/prisma.module';
     },
     {
       provide: 'ArtistRepositoryInterface',
-      useClass: InMemoryArtistRepository,
+      useClass: PrismaArtistRepository,
     },
     {
       provide: 'AlbumRepositoryInterface',
-      useClass: InMemoryAlbumRepository,
+      useClass: PrismaAlbumRepository,
     },
     {
       provide: 'TrackRepositoryInterface',
-      useClass: InMemoryTrackRepository,
+      useClass: PrismaTrackRepository,
     },
     {
       provide: 'FavsRepositoryInterface',
-      useClass: InMemoryFavsRepository,
+      useClass: PrismaFavsRepository,
     },
   ],
   exports: [

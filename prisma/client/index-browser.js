@@ -152,7 +152,7 @@ exports.Prisma.ArtistScalarFieldEnum = {
   grammy: 'grammy'
 };
 
-exports.Prisma.FavoriteScalarFieldEnum = {
+exports.Prisma.FavoritesScalarFieldEnum = {
   id: 'id',
   artists: 'artists',
   albums: 'albums',
@@ -180,7 +180,7 @@ exports.Prisma.ModelName = {
   Album: 'Album',
   Track: 'Track',
   Artist: 'Artist',
-  Favorite: 'Favorite'
+  Favorites: 'Favorites'
 };
 
 /**

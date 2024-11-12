@@ -6,14 +6,11 @@ COPY package*.json ./
 
 RUN npm install --legacy-peer-deps
 
-COPY prisma ./prisma
-COPY .env .env
 COPY . .
 
 RUN npm run build && \
-    npx prisma generate && \
-    npx prisma migrate dev --name init
+    npx prisma generate
 
 EXPOSE 4000
 
-CMD ["npm", "run",  "start:dev-src"]
+CMD ["npm", "run", "start:dev-src"]

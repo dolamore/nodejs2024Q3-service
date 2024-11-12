@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { UserReturnData } from '../types/userReturnData';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
+import { User } from '../../../prisma/client';
 
 @Injectable()
 export class UserService {
@@ -11,31 +11,29 @@ export class UserService {
     private readonly userRepository: UserRepositoryInterface,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserReturnData> {
-    const result = this.userRepository.create(createUserDto);
-    return result instanceof Promise ? await result : result;
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    return this.userRepository.upsertUser(
+      createUserDto.login,
+      createUserDto.password,
+    );
   }
 
-  async findAll(): Promise<UserReturnData[]> {
-    const result = this.userRepository.findAll();
-    return result instanceof Promise ? await result : result;
+  async getAllUsers(): Promise<User[]> {
+    return this.userRepository.getAllUsers();
   }
 
-  async findOne(id: string): Promise<UserReturnData | undefined> {
-    const result = this.userRepository.findOne(id);
-    return result instanceof Promise ? await result : result;
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.userRepository.getUserById(id);
   }
 
-  async delete(id: string): Promise<void> {
-    const result = this.userRepository.delete(id);
-    return result instanceof Promise ? await result : result;
+  async deleteUser(id: string): Promise<void> {
+    this.userRepository.deleteUser(id);
   }
 
   async updatePassword(
     id: string,
     updatePasswordDto: UpdatePasswordDto,
-  ): Promise<UserReturnData> {
-    const result = this.userRepository.updatePassword(id, updatePasswordDto);
-    return result instanceof Promise ? await result : result;
+  ): Promise<User> {
+    return this.userRepository.updatePassword(id, updatePasswordDto);
   }
 }

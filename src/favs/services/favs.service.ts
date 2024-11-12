@@ -28,19 +28,25 @@ export class FavsService {
     const favArtists = await this.favsRepository.getAllFavs();
     for (const artistId of favArtists.artists) {
       const artist = await this.artistRepository.getArtistById(artistId);
-      allFavs.artists.push(artist);
+      if (artist) {
+        allFavs.artists.push(artist);
+      }
     }
 
     const favAlbums = await this.favsRepository.getAllFavs();
     for (const albumId of favAlbums.albums) {
       const album = await this.albumRepository.getAlbumById(albumId);
-      allFavs.albums.push(album);
+      if (album) {
+        allFavs.albums.push(album);
+      }
     }
 
     const favTracks = await this.favsRepository.getAllFavs();
     for (const trackId of favTracks.tracks) {
       const track = await this.trackRepository.getTrackById(trackId);
-      allFavs.tracks.push(track);
+      if (track) {
+        allFavs.tracks.push(track);
+      }
     }
 
     return allFavs;
@@ -87,16 +93,16 @@ export class FavsService {
 
   async isArtistExist(id: string) {
     const result = await this.artistRepository.getArtistById(id);
-    return result !== undefined;
+    return result !== undefined && result !== null;
   }
 
   async isAlbumExist(id: string) {
     const result = await this.albumRepository.getAlbumById(id);
-    return result !== undefined;
+    return result !== undefined && result !== null;
   }
 
   async isTrackExist(id: string) {
     const result = await this.trackRepository.getTrackById(id);
-    return result !== undefined;
+    return result !== undefined && result !== null;
   }
 }

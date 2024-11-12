@@ -5,7 +5,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
@@ -28,8 +27,7 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Successfully retrieved all users' })
   async getAllUsers() {
-    const result = this.userService.findAll();
-    return result instanceof Promise ? await result : result;
+    return await this.userService.getAllUsers();
   }
 
   @Get(':id')
@@ -42,15 +40,11 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid user ID' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async getUserById(@Param('id') id: string): Promise<UserReturnData> {
-    if (!validate(id)) {
-      throw new BadRequestException('Invalid user ID');
-    }
+    this.validateId(id);
+    await this.isUserExist(id);
 
-    const result = await this.userService.findOne(id);
-    const user = result instanceof Promise ? await result : result;
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.userService.getUserById(id);
+
     return {
       id: user.id,
       login: user.login,
@@ -70,22 +64,16 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() createUserDto: CreateUserDto) {
-    if (!createUserDto.login || !createUserDto.password) {
-      throw new HttpException(
-        'Missing required fields',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    this.validateCreateUserDto(createUserDto);
 
-    const user = this.userService.create(createUserDto);
-    const result = user instanceof Promise ? await user : user;
-
+    const user = await this.userService.createUser(createUserDto);
+    console.log(user);
     return {
-      id: result.id,
-      login: result.login,
-      version: result.version,
-      createdAt: result.createdAt,
-      updatedAt: result.updatedAt,
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 
@@ -113,22 +101,30 @@ export class UserController {
       !updatePasswordDto.newPassword ||
       typeof updatePasswordDto.newPassword !== 'string'
     ) {
-      throw new BadRequestException(
-        'Password is required and must be at least 6 characters',
-      );
+      throw new BadRequestException('Password is required');
     }
     if (!validate(id)) {
       throw new BadRequestException('Invalid user ID');
     }
 
-    const result = this.userService.findOne(id);
+    const result = this.userService.getUserById(id);
     const user = result instanceof Promise ? await result : result;
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    const resultUpdatePassword = await this.userService.updatePassword(
+      id,
+      updatePasswordDto,
+    );
 
-    return this.userService.updatePassword(id, updatePasswordDto);
+    return {
+      id: resultUpdatePassword.id,
+      login: resultUpdatePassword.login,
+      version: resultUpdatePassword.version,
+      createdAt: resultUpdatePassword.createdAt,
+      updatedAt: resultUpdatePassword.updatedAt,
+    };
   }
 
   @Delete(':id')
@@ -138,20 +134,28 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid user ID' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async deleteUser(@Param('id') id: string) {
+    this.validateId(id);
+    await this.isUserExist(id);
+
+    return await this.userService.deleteUser(id);
+  }
+
+  validateId(id: string) {
     if (!validate(id)) {
       throw new BadRequestException('Invalid user ID');
     }
+  }
 
-    const result = await this.userService.findOne(id);
-    const user = result instanceof Promise ? await result : result;
-
+  async isUserExist(id: string) {
+    const user = await this.userService.getUserById(id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User wasn't found");
     }
+  }
 
-    await this.userService.delete(id);
-    return {
-      statusCode: HttpStatus.NO_CONTENT,
-    };
+  validateCreateUserDto(createUserDto: CreateUserDto) {
+    if (!createUserDto.login || !createUserDto.password) {
+      throw new BadRequestException('Login and password are required');
+    }
   }
 }

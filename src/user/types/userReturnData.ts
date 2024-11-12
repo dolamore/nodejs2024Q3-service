@@ -8,7 +8,7 @@ export class UserReturnData {
   @ApiProperty({ description: 'Version of the user' })
   version: number;
   @ApiProperty({ description: 'Time when the user was created' })
-  createdAt: number;
+  createdAt: Date;
   @ApiProperty({ description: 'Time when the user was last updated' })
-  updatedAt: number;
+  updatedAt: Date;
 }

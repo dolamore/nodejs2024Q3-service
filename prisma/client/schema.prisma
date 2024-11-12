@@ -31,9 +31,9 @@ model Track {
   name     String
   duration Int
   artist   Artist? @relation(fields: [artistId], references: [id])
-  artistId String
+  artistId String?
   album    Album?  @relation(fields: [albumId], references: [id])
-  albumId  String
+  albumId  String?
 }
 
 model Artist {
@@ -44,7 +44,7 @@ model Artist {
   tracks Track[]
 }
 
-model Favorite {
+model Favorites {
   id      String   @id @default(uuid())
   artists String[]
   albums  String[]

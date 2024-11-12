@@ -44,11 +44,8 @@ export class TrackController {
   async getTrackById(@Param('id') id: string) {
     this.validateId(id);
     await this.isTrackExist(id);
-    const result = await this.trackService.getTrackById(id);
-    if (!result) {
-      throw new NotFoundException("Track wasn't found");
-    }
-    return result;
+
+    return await this.trackService.getTrackById(id);
   }
 
   @Post()

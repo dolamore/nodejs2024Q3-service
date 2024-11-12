@@ -37,7 +37,7 @@ export class FavsController {
     description: 'Successfully added artist to favorites',
   })
   @ApiResponse({ status: 400, description: 'Invalid artist ID' })
-  @ApiResponse({ status: 404, description: 'Artist not found' })
+  @ApiResponse({ status: 422, description: 'Artist not found' })
   async addArtistToFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.isArtistExist(id);
@@ -51,7 +51,7 @@ export class FavsController {
     description: 'Successfully added album to favorites',
   })
   @ApiResponse({ status: 400, description: 'Invalid album ID' })
-  @ApiResponse({ status: 404, description: 'Album not found' })
+  @ApiResponse({ status: 422, description: 'Album not found' })
   async addAlbumToFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.isAlbumExist(id);
@@ -65,7 +65,7 @@ export class FavsController {
     description: 'Successfully added track to favorites',
   })
   @ApiResponse({ status: 400, description: 'Invalid track ID' })
-  @ApiResponse({ status: 404, description: 'Track not found' })
+  @ApiResponse({ status: 422, description: 'Track not found' })
   async addTrackToFavs(@Param('id') id: string) {
     this.validateId(id);
     await this.isTrackExist(id);
@@ -124,21 +124,21 @@ export class FavsController {
   }
 
   async validateTrackId(id: string) {
-    const result = await this.favsService.isTrackExist(id);
+    const result = await this.favsService.isTrackFav(id);
     if (!result) {
-      throw new NotFoundException('Track already not in favorites');
+      throw new NotFoundException('Track is not in favorites');
     }
   }
 
   async validateAlbumId(id: string) {
-    const result = await this.favsService.isAlbumExist(id);
+    const result = await this.favsService.isAlbumFav(id);
     if (!result) {
       throw new NotFoundException('Album is not in favorites');
     }
   }
 
   async validateArtistId(id: string) {
-    const result = await this.favsService.isArtistExist(id);
+    const result = await this.favsService.isArtistFav(id);
     if (!result) {
       throw new NotFoundException('Artist is not in favorites');
     }

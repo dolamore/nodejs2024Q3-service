@@ -4,6 +4,7 @@ import { Artist } from '../../artist/interfaces/artist.interface';
 import { ApiProperty } from '@nestjs/swagger';
 
 export interface Favorites {
+  id: string;
   artists: string[];
   albums: string[];
   tracks: string[];
