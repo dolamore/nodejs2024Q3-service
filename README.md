@@ -28,6 +28,9 @@ docker pull dolamore/nodejs2024q3-service:app
 
 
 ## Running application
+
+Create .env file out of .env.example
+
 To build the docker-compose.yml file and start the container in background mode
 
 ```
