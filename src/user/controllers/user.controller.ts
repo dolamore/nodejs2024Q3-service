@@ -66,15 +66,7 @@ export class UserController {
   async createUser(@Body() createUserDto: CreateUserDto) {
     this.validateCreateUserDto(createUserDto);
 
-    const user = await this.userService.createUser(createUserDto);
-    console.log(user);
-    return {
-      id: user.id,
-      login: user.login,
-      version: user.version,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return await this.userService.createUser(createUserDto);
   }
 
   @Put(':id')

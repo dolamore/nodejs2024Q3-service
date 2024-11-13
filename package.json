@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "cross-env POSTGRES_HOST=localhost nest start --watch",
-    "start:dev-src": "nest start --watch src docker exec -it nodejs2024q3-service-${DOCKER_CONTAINER_NAME} npx prisma migrate dev --name init",
+    "start:dev-src": "nest start --watch src",
     "start:debug": "cross-env POSTGRES_HOST=localhost nest start --debug --watch",
     "start:prod": "cross-env POSTGRES_HOST=localhost node dist/main",
     "scan:vulnerabilities": "npm audit",

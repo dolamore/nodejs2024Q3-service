@@ -4,17 +4,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
-import { User } from '../../../prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { UserReturnData } from '../types/userReturnData';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepositoryInterface {
   constructor(private prisma: PrismaService) {}
 
-  async upsertUser(login: string, password: string): Promise<User> {
-    return this.prisma.user.upsert({
+  async upsertUser(login: string, password: string): Promise<UserReturnData> {
+    const user = await this.prisma.user.upsert({
       where: { login },
       update: {
         password: password,
@@ -28,20 +28,50 @@ export class PrismaUserRepository implements UserRepositoryInterface {
         updatedAt: new Date(),
       },
     });
+
+    return {
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      createdAt: Number(user.createdAt),
+      updatedAt: Number(user.updatedAt),
+    };
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return this.prisma.user.findMany();
+  async getAllUsers(): Promise<UserReturnData[]> {
+    const users = await this.prisma.user.findMany();
+
+    return users.map((user) => {
+      return new UserReturnData({
+        id: user.id,
+        login: user.login,
+        version: user.version,
+        createdAt: Number(user.createdAt),
+        updatedAt: Number(user.updatedAt),
+      });
+    });
   }
 
-  async getUserById(id: string): Promise<User | undefined> {
-    return this.prisma.user.findUnique({ where: { id } });
+  async getUserById(id: string): Promise<UserReturnData | undefined> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) {
+      return null;
+    }
+
+    return new UserReturnData({
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      createdAt: Number(user.createdAt),
+      updatedAt: Number(user.updatedAt),
+    });
   }
 
   async updatePassword(
     id: string,
     updatePasswordDto: UpdatePasswordDto,
-  ): Promise<User> {
+  ): Promise<UserReturnData> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) {
@@ -52,13 +82,21 @@ export class PrismaUserRepository implements UserRepositoryInterface {
       throw new ForbiddenException(`Password is incorrect`);
     }
 
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
         password: updatePasswordDto.newPassword,
         version: user.version + 1,
         updatedAt: new Date(),
       },
+    });
+
+    return new UserReturnData({
+      id: updatedUser.id,
+      login: updatedUser.login,
+      version: updatedUser.version,
+      createdAt: Number(updatedUser.createdAt),
+      updatedAt: Number(updatedUser.updatedAt),
     });
   }
 

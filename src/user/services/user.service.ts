@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { UserRepositoryInterface } from '../interfaces/user.repository.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
-import { User } from '../../../prisma/client';
+import { UserReturnData } from '../types/userReturnData';
 
 @Injectable()
 export class UserService {
@@ -11,18 +11,18 @@ export class UserService {
     private readonly userRepository: UserRepositoryInterface,
   ) {}
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserReturnData> {
     return this.userRepository.upsertUser(
       createUserDto.login,
       createUserDto.password,
     );
   }
 
-  async getAllUsers(): Promise<User[]> {
+  async getAllUsers(): Promise<UserReturnData[]> {
     return this.userRepository.getAllUsers();
   }
 
-  async getUserById(id: string): Promise<User | undefined> {
+  async getUserById(id: string): Promise<UserReturnData | undefined> {
     return this.userRepository.getUserById(id);
   }
 
@@ -33,7 +33,7 @@ export class UserService {
   async updatePassword(
     id: string,
     updatePasswordDto: UpdatePasswordDto,
-  ): Promise<User> {
+  ): Promise<UserReturnData> {
     return this.userRepository.updatePassword(id, updatePasswordDto);
   }
 }

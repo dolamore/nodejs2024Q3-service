@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -8,9 +8,8 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN npm run build && \
-    npx prisma generate
+RUN chmod +x /app/init.sh
 
-EXPOSE 4000
+CMD ["/bin/sh", "-c", "/app/init.sh"]
 
-CMD ["npm", "run", "start:dev-src"]
+EXPOSE ${PORT}

@@ -8,7 +8,21 @@ export class UserReturnData {
   @ApiProperty({ description: 'Version of the user' })
   version: number;
   @ApiProperty({ description: 'Time when the user was created' })
-  createdAt: Date;
+  createdAt: number;
   @ApiProperty({ description: 'Time when the user was last updated' })
-  updatedAt: Date;
+  updatedAt: number;
+
+  constructor(data: {
+    id: string;
+    login: string;
+    version: number;
+    createdAt: number;
+    updatedAt: number;
+  }) {
+    this.id = data.id;
+    this.login = data.login;
+    this.version = data.version;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+  }
 }
