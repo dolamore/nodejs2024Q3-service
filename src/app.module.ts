@@ -10,9 +10,11 @@ import { TrackModule } from './track/track.module';
 import { FavsModule } from './favs/favs.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggingModule } from './logging/logging.module';
-import { PrismaUserRepository } from './user/repositories/prisma-user.repository';
 import { LoggingService } from './logging/logging.service';
 import { LoggerMiddleware } from './logging/logging.middleware';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { LoggerMiddleware } from './logging/logging.middleware';
     FavsModule,
     PrismaModule,
     LoggingModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -32,6 +35,10 @@ import { LoggerMiddleware } from './logging/logging.middleware';
     {
       provide: 'LoggingService',
       useClass: LoggingService,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Глобальное подключение JWT-Guard
     },
   ],
 })
