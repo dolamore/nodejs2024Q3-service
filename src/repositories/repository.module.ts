@@ -5,6 +5,7 @@ import { PrismaTrackRepository } from '../track/repositories/prisma-track.reposi
 import { PrismaArtistRepository } from '../artist/repositories/prisma-artist.repository';
 import { PrismaAlbumRepository } from '../album/repositories/prisma-album.repository';
 import { PrismaFavsRepository } from '../favs/repositories/prisma-fav.repository';
+import { PrismaRefreshTokenRepository } from '../user/repositories/prisma-token.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -29,6 +30,10 @@ import { PrismaFavsRepository } from '../favs/repositories/prisma-fav.repository
       provide: 'FavsRepositoryInterface',
       useClass: PrismaFavsRepository,
     },
+    {
+      provide: 'PrismaRefreshTokenRepository',
+      useClass: PrismaRefreshTokenRepository,
+    },
   ],
   exports: [
     'UserRepositoryInterface',
@@ -36,6 +41,7 @@ import { PrismaFavsRepository } from '../favs/repositories/prisma-fav.repository
     'AlbumRepositoryInterface',
     'TrackRepositoryInterface',
     'FavsRepositoryInterface',
+    'PrismaRefreshTokenRepository',
   ],
 })
 export class RepositoryModule {}

@@ -83,6 +83,7 @@ export class InMemoryUserRepository implements UserRepositoryInterface {
     return user ? user.password === password : false;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getUserByLogin(login: string): Promise<User | undefined> | User {
     return undefined;
   }
