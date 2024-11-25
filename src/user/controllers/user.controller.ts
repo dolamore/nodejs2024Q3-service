@@ -17,11 +17,15 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
 import { UserReturnData } from '../types/userReturnData';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoggingService } from '../../logging/logging.service';
 
 @ApiTags('Users')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private loggingService: LoggingService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
