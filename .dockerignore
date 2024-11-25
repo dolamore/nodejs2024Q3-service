@@ -1,0 +1,8 @@
+node_modules
+.idea
+.git
+dist
+prisma/client
+prisma/migrations
+README.md
+*.log
