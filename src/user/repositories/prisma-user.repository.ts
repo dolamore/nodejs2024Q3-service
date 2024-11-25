@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UserReturnData } from '../types/userReturnData';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class PrismaUserRepository implements UserRepositoryInterface {
@@ -98,6 +99,16 @@ export class PrismaUserRepository implements UserRepositoryInterface {
       createdAt: Number(updatedUser.createdAt),
       updatedAt: Number(updatedUser.updatedAt),
     });
+  }
+
+  async getUserByLogin(login: string): Promise<User | undefined> {
+    const user = await this.prisma.user.findUnique({ where: { login } });
+
+    if (!user) {
+      return null;
+    }
+
+    return user;
   }
 
   async deleteUser(id: string): Promise<void> {

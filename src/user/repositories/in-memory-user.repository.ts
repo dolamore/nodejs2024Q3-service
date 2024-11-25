@@ -82,4 +82,8 @@ export class InMemoryUserRepository implements UserRepositoryInterface {
     const user = this.users.find((user) => user.id === userId);
     return user ? user.password === password : false;
   }
+
+  getUserByLogin(login: string): Promise<User | undefined> | User {
+    return undefined;
+  }
 }
